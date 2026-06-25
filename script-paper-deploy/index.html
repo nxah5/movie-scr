@@ -1,0 +1,1657 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>스크립트 용지 / Script PaPer</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef3f0;
+      --panel: #ffffff;
+      --paper: #fffdf8;
+      --ink: #1d211f;
+      --muted: #65706b;
+      --line: #cfd8d2;
+      --line-dark: #3a403d;
+      --accent: #276b5d;
+      --accent-2: #b85b38;
+      --accent-3: #4257a8;
+      --soft: #e6eee9;
+      --danger: #a53c3c;
+      --shadow: 0 18px 50px rgba(35, 47, 43, 0.15);
+      --radius: 8px;
+      font-family: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(39, 107, 93, 0.12), rgba(184, 91, 56, 0.08)),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      align-items: end;
+      gap: 18px;
+      padding: 22px 28px 14px;
+      border-bottom: 1px solid rgba(58, 64, 61, 0.12);
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand-kicker {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+      margin-bottom: 5px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(19px, 2.6vw, 30px);
+      line-height: 1.15;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .tab-button,
+    .action-button,
+    .small-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 38px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(58, 64, 61, 0.16);
+      background: #fff;
+      color: var(--ink);
+      font-weight: 800;
+      white-space: nowrap;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .tab-button {
+      padding: 0 13px;
+      font-size: 13px;
+    }
+
+    .tab-button[aria-selected="true"] {
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .tab-button:hover,
+    .action-button:hover,
+    .small-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .workbench {
+      display: grid;
+      grid-template-columns: minmax(340px, 460px) minmax(0, 1fr);
+      gap: 22px;
+      padding: 22px 28px 32px;
+      align-items: start;
+    }
+
+    .input-panel,
+    .output-panel {
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(58, 64, 61, 0.12);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 30px rgba(35, 47, 43, 0.08);
+    }
+
+    .input-panel {
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(58, 64, 61, 0.12);
+      background: #f9fbfa;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    .form-section {
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(58, 64, 61, 0.12);
+    }
+
+    .form-section:last-child {
+      padding-bottom: 0;
+      margin-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 12px;
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .section-label::before {
+      content: "";
+      width: 8px;
+      height: 18px;
+      border-radius: 4px;
+      background: var(--accent-2);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 11px;
+    }
+
+    .field-grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label,
+    .field-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input,
+    select {
+      height: 38px;
+      padding: 0 10px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 72px;
+      padding: 10px;
+      line-height: 1.45;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(39, 107, 93, 0.13);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .segmented button {
+      height: 36px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 900;
+      border-right: 1px solid var(--line);
+    }
+
+    .segmented button:last-child {
+      border-right: 0;
+    }
+
+    .segmented button[aria-pressed="true"] {
+      background: var(--accent-3);
+      color: #fff;
+    }
+
+    .page-controls {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid rgba(58, 64, 61, 0.12);
+      border-radius: var(--radius);
+      background: #f7faf8;
+    }
+
+    .page-control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .page-control-row select {
+      flex: 1 1 180px;
+    }
+
+    .page-status {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .take-editor {
+      display: grid;
+      gap: 10px;
+    }
+
+    .take-card {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid rgba(58, 64, 61, 0.12);
+      border-radius: var(--radius);
+      background: #fbfcfb;
+    }
+
+    .take-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .take-card-title {
+      color: var(--accent-3);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .small-button {
+      min-height: 30px;
+      padding: 0 9px;
+      font-size: 12px;
+      background: #fff;
+    }
+
+    .small-button.danger {
+      color: var(--danger);
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .action-button {
+      min-height: 40px;
+      padding: 0 14px;
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .action-button.secondary {
+      background: #fff;
+      color: var(--accent);
+    }
+
+    .output-panel {
+      min-width: 0;
+      padding: 18px;
+    }
+
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .output-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .output-type-button[aria-pressed="true"] {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .paper-wrap {
+      display: block;
+      width: 100%;
+      overflow: auto;
+      padding: 10px;
+    }
+
+    .paper-stack {
+      display: grid;
+      gap: 18px;
+      justify-items: start;
+      width: max-content;
+      min-width: 210mm;
+    }
+
+    .paper {
+      width: 210mm;
+      aspect-ratio: 210 / 297;
+      min-height: 297mm;
+      display: grid;
+      grid-template-rows: auto auto auto auto;
+      align-content: start;
+      gap: 3.2mm;
+      padding: 8mm;
+      background: var(--paper);
+      color: #111;
+      box-shadow: var(--shadow);
+      border: 1px solid #e6dfd3;
+      overflow: hidden;
+    }
+
+    .paper-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 8mm;
+      padding-bottom: 3mm;
+      border-bottom: 0.55mm solid var(--line-dark);
+    }
+
+    .paper-title {
+      margin: 0;
+      font-size: 14pt;
+      line-height: 1.15;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+
+    .paper-type {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 33mm;
+      min-height: 10mm;
+      padding: 1.2mm 3mm;
+      border: 0.45mm solid var(--line-dark);
+      font-size: 9.5pt;
+      font-weight: 900;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .paper-page-count {
+      display: block;
+      margin-top: 0.8mm;
+      color: #4f5853;
+      font-size: 6.4pt;
+      line-height: 1;
+    }
+
+    .paper-section {
+      border: 0.35mm solid var(--line-dark);
+      min-width: 0;
+    }
+
+    .paper-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 8mm;
+      padding: 0 2.4mm;
+      border-bottom: 0.35mm solid var(--line-dark);
+      background: #ecefea;
+      font-size: 8.5pt;
+      font-weight: 900;
+    }
+
+    .paper-section-title span:last-child {
+      color: #404642;
+      font-size: 7.6pt;
+    }
+
+    .paper-grid {
+      display: grid;
+      min-width: 0;
+    }
+
+    .basic-grid {
+      grid-template-columns: 1.45fr 0.82fr 0.72fr 1.25fr 0.86fr;
+    }
+
+    .camera-grid {
+      grid-template-columns: 0.58fr 0.58fr 0.82fr 1.1fr 1fr 1fr 0.84fr;
+    }
+
+    .sound-grid,
+    .combo-grid {
+      grid-template-columns: 0.7fr 0.7fr 0.9fr 1.35fr 0.95fr;
+    }
+
+    .paper-cell {
+      min-height: 13mm;
+      padding: 1.4mm 1.6mm;
+      border-right: 0.28mm solid var(--line-dark);
+      min-width: 0;
+    }
+
+    .paper-cell:last-child {
+      border-right: 0;
+    }
+
+    .paper-label {
+      display: block;
+      color: #4f5853;
+      font-size: 6.7pt;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 1.1mm;
+    }
+
+    .paper-value {
+      color: #111;
+      font-size: 8.6pt;
+      font-weight: 700;
+      line-height: 1.24;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .session2-grid {
+      grid-template-columns: 0.95fr 2.1fr 1.1fr;
+    }
+
+    .session2-grid .paper-cell {
+      min-height: 38mm;
+    }
+
+    .session2-grid .paper-value {
+      font-size: 8.1pt;
+      line-height: 1.28;
+    }
+
+    .take-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .take-table th,
+    .take-table td {
+      border-right: 0.22mm solid var(--line-dark);
+      border-bottom: 0.22mm solid var(--line-dark);
+      padding: 1.2mm 1.1mm;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .take-table th:last-child,
+    .take-table td:last-child {
+      border-right: 0;
+    }
+
+    .take-table th {
+      height: 7.5mm;
+      color: #202522;
+      background: #f5f6f3;
+      font-size: 6.4pt;
+      font-weight: 900;
+      line-height: 1.15;
+      text-align: left;
+    }
+
+    .take-table td {
+      font-size: 7.15pt;
+      line-height: 1.18;
+      font-weight: 700;
+    }
+
+    .take-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .sheet-camera col.take,
+    .sheet-sound col.take {
+      width: 9%;
+    }
+
+    .sheet-camera col.status,
+    .sheet-sound col.status {
+      width: 13%;
+    }
+
+    .sheet-camera col.file,
+    .sheet-sound col.file {
+      width: 15%;
+    }
+
+    .sheet-camera col.roll,
+    .sheet-sound col.roll {
+      width: 10%;
+    }
+
+    .sheet-camera col.content,
+    .sheet-sound col.content {
+      width: 36%;
+    }
+
+    .sheet-camera col.slate,
+    .sheet-sound col.slate {
+      width: 17%;
+    }
+
+    .sheet-combo .take-table th,
+    .sheet-combo .take-table td {
+      padding-left: 0.75mm;
+      padding-right: 0.75mm;
+      font-size: 6.25pt;
+    }
+
+    .sheet-combo .take-table th {
+      font-size: 5.6pt;
+    }
+
+    .sheet-combo col.combo-take {
+      width: 6%;
+    }
+
+    .sheet-combo col.combo-r {
+      width: 7%;
+    }
+
+    .sheet-combo col.combo-file {
+      width: 12%;
+    }
+
+    .sheet-combo col.combo-status {
+      width: 10%;
+    }
+
+    .sheet-combo col.combo-content {
+      width: 24%;
+    }
+
+    .sheet-combo col.combo-slate {
+      width: 12%;
+    }
+
+    .output-page {
+      display: none;
+      padding: 22px 28px 32px;
+    }
+
+    .output-page.active {
+      display: block;
+    }
+
+    .output-page .output-panel {
+      max-width: none;
+      margin: 0 auto;
+    }
+
+    #printMount {
+      display: none;
+    }
+
+    @media (max-width: 1040px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .tabs {
+        justify-content: flex-start;
+      }
+
+      .workbench {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 1041px) {
+      .workbench {
+        height: calc(100vh - 89px);
+        overflow: hidden;
+        align-items: stretch;
+      }
+
+      .input-panel,
+      .output-panel {
+        max-height: 100%;
+        overflow: auto;
+      }
+
+      .paper-wrap {
+        max-height: calc(100vh - 178px);
+      }
+
+      .output-page {
+        height: calc(100vh - 89px);
+        overflow: hidden;
+      }
+
+      .output-page .output-panel {
+        height: 100%;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .topbar,
+      .workbench,
+      .output-page {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .field-grid,
+      .field-grid.three {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-toolbar,
+      .output-controls {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .output-type-button,
+      .action-button {
+        width: 100%;
+      }
+
+      .paper-wrap {
+        padding: 0;
+      }
+    }
+
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    @media print {
+      html,
+      body {
+        width: 210mm;
+        height: 297mm;
+        background: #fff;
+      }
+
+      body.printing .app-shell {
+        display: none;
+      }
+
+      body.printing #printMount {
+        display: block;
+      }
+
+      body.printing #printMount .paper {
+        width: 210mm;
+        height: 297mm;
+        min-height: 297mm;
+        margin: 0;
+        padding: 7.5mm;
+        box-shadow: none;
+        border: 0;
+        background: #fffdf8;
+        page-break-after: always;
+      }
+
+      body.printing #printMount .paper:last-child {
+        page-break-after: auto;
+      }
+
+      body.printing #printMount .paper-stack {
+        display: block;
+        min-width: 0;
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-kicker">SCRIPT PAPER</div>
+        <h1 id="appTitle">스크립트 용지 / Script PaPer</h1>
+      </div>
+      <nav class="tabs" aria-label="스크립트 구조">
+        <button class="tab-button" type="button" data-tab="camera" aria-selected="true">촬영 스크립트</button>
+        <button class="tab-button" type="button" data-tab="sound" aria-selected="false">음향 스크립트</button>
+        <button class="tab-button" type="button" data-tab="combo" aria-selected="false">촬영,음향 스크립트</button>
+        <button class="tab-button" type="button" data-tab="output" aria-selected="false">출력페이지</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="editorPage" class="workbench">
+        <aside class="input-panel" aria-label="입력부분">
+          <div class="panel-header">
+            <h2 class="panel-title">입력부분</h2>
+            <button class="small-button" type="button" id="clearSheet">현재 페이지 비우기</button>
+          </div>
+          <div class="panel-body" id="formMount"></div>
+        </aside>
+
+        <section class="output-panel" aria-label="출력부분">
+          <div class="preview-toolbar">
+            <h2 class="panel-title">출력부분</h2>
+            <div class="action-row" style="margin-top: 0;">
+              <button class="action-button secondary" type="button" id="printCurrent">인쇄</button>
+            </div>
+          </div>
+          <div class="paper-wrap" id="previewMount"></div>
+        </section>
+      </section>
+
+      <section id="outputPage" class="output-page" aria-label="출력페이지">
+        <section class="output-panel">
+          <div class="preview-toolbar">
+            <h2 class="panel-title">출력페이지</h2>
+            <div class="output-controls" role="group" aria-label="출력 종류">
+              <button class="small-button output-type-button" type="button" data-output-type="camera" aria-pressed="true">촬영 스크립트</button>
+              <button class="small-button output-type-button" type="button" data-output-type="sound" aria-pressed="false">음향 스크립트</button>
+              <button class="small-button output-type-button" type="button" data-output-type="combo" aria-pressed="false">촬영,음향 스크립트</button>
+              <button class="action-button" type="button" id="printOutput">인쇄</button>
+            </div>
+          </div>
+          <div class="paper-wrap" id="outputMount"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="printMount" aria-hidden="true"></div>
+
+  <script>
+    const STORAGE_KEY = "codex_script_paper_v1";
+    const SCRIPT_TYPES = ["camera", "sound", "combo"];
+
+    const STATUS_OPTIONS = ["", "OK", "Keep", "NG"];
+    const SHEET_META = {
+      camera: {
+        title: "촬영 스크립트",
+        session1: [
+          ["scene", "씬"],
+          ["cut", "컷"],
+          ["weather", "날씨"],
+          ["camera", "Camera"],
+          ["lens", "Lens"],
+          ["filter", "Filter"],
+          ["roll", "Roll#"]
+        ],
+        takes: "single"
+      },
+      sound: {
+        title: "음향 스크립트",
+        session1: [
+          ["scene", "씬"],
+          ["cut", "컷"],
+          ["weather", "날씨"],
+          ["recordingMethod", "녹음방식"],
+          ["roll", "Roll#"]
+        ],
+        takes: "single"
+      },
+      combo: {
+        title: "촬영,음향 스크립트",
+        session1: [
+          ["scene", "씬"],
+          ["cut", "컷"],
+          ["weather", "날씨"],
+          ["recordingMethod", "녹음방식"],
+          ["roll", "Roll#"]
+        ],
+        takes: "combo"
+      }
+    };
+
+    const blankTakeFor = (type) => SHEET_META[type].takes === "combo" ? emptyComboTake() : emptySingleTake();
+
+    const emptySingleTake = () => ({
+      take: "",
+      status: "",
+      fileNo: "",
+      rNo: "",
+      content: "",
+      slate: ""
+    });
+
+    const emptyComboTake = () => ({
+      take: "",
+      cameraRNo: "",
+      cameraFileNo: "",
+      cameraStatus: "",
+      soundRNo: "",
+      soundFileNo: "",
+      soundStatus: "",
+      content: "",
+      slate: ""
+    });
+
+    const createPage = (type) => ({
+      session1: {
+        scene: "",
+        cut: "",
+        weather: "",
+        camera: "",
+        lens: "",
+        filter: "",
+        recordingMethod: "동시",
+        roll: ""
+      },
+      session2: {
+        continuity: "",
+        actionDialog: "",
+        sound: ""
+      },
+      takes: [blankTakeFor(type)]
+    });
+
+    const createSheet = (type) => ({
+      pages: [createPage(type)]
+    });
+
+    const defaultState = () => ({
+      activeTab: "camera",
+      outputType: "camera",
+      pageIndex: {
+        camera: 0,
+        sound: 0,
+        combo: 0
+      },
+      basic: {
+        projectName: "",
+        date: "",
+        startTime: "",
+        location: "",
+        weather: ""
+      },
+      sheets: {
+        camera: createSheet("camera"),
+        sound: createSheet("sound"),
+        combo: createSheet("combo")
+      }
+    });
+
+    let state = loadState();
+
+    const formMount = document.getElementById("formMount");
+    const previewMount = document.getElementById("previewMount");
+    const outputMount = document.getElementById("outputMount");
+    const editorPage = document.getElementById("editorPage");
+    const outputPage = document.getElementById("outputPage");
+    const appTitle = document.getElementById("appTitle");
+
+    function loadState() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (!parsed || !parsed.sheets) return defaultState();
+        const seeded = defaultState();
+        const normalized = {
+          ...seeded,
+          ...parsed,
+          basic: { ...seeded.basic, ...(parsed.basic || {}) },
+          pageIndex: { ...seeded.pageIndex, ...(parsed.pageIndex || {}) },
+          sheets: {
+            camera: normalizeSheet("camera", parsed.sheets.camera),
+            sound: normalizeSheet("sound", parsed.sheets.sound),
+            combo: normalizeSheet("combo", parsed.sheets.combo)
+          }
+        };
+        normalized.activeTab = ["camera", "sound", "combo", "output"].includes(normalized.activeTab) ? normalized.activeTab : "camera";
+        normalized.outputType = SCRIPT_TYPES.includes(normalized.outputType) ? normalized.outputType : "camera";
+        SCRIPT_TYPES.forEach((type) => {
+          normalized.pageIndex[type] = clampPageIndex(type, normalized.pageIndex[type], normalized.sheets);
+        });
+        return normalized;
+      } catch (error) {
+        return defaultState();
+      }
+    }
+
+    function normalizeSheet(type, sheet) {
+      const pages = Array.isArray(sheet?.pages)
+        ? sheet.pages
+        : sheet?.session1 || sheet?.session2 || sheet?.takes
+          ? [sheet]
+          : [];
+      const normalizedPages = pages.map((page) => normalizePage(type, page)).filter(Boolean);
+      return {
+        pages: normalizedPages.length ? normalizedPages : [createPage(type)]
+      };
+    }
+
+    function normalizePage(type, page) {
+      const seeded = createPage(type);
+      return {
+        session1: { ...seeded.session1, ...(page?.session1 || {}) },
+        session2: { ...seeded.session2, ...(page?.session2 || {}) },
+        takes: normalizeTakes(type, page?.takes)
+      };
+    }
+
+    function normalizeTakes(type, takes) {
+      const rows = Array.isArray(takes) ? takes : [];
+      const normalized = rows.map((row) => ({ ...blankTakeFor(type), ...(row || {}) }));
+      while (normalized.length > 1 && isTakeEmpty(normalized[normalized.length - 1])) {
+        normalized.pop();
+      }
+      return normalized.length ? normalized : [blankTakeFor(type)];
+    }
+
+    function isTakeEmpty(row) {
+      return Object.values(row || {}).every((value) => String(value ?? "").trim() === "");
+    }
+
+    function printableTakes(type, rows) {
+      const filled = (rows || []).filter((row) => !isTakeEmpty(row));
+      return filled.length ? filled : [blankTakeFor(type)];
+    }
+
+    function clonePage(page) {
+      return JSON.parse(JSON.stringify(page));
+    }
+
+    function getPages(type) {
+      if (!state.sheets[type]?.pages?.length) {
+        state.sheets[type] = createSheet(type);
+      }
+      return state.sheets[type].pages;
+    }
+
+    function clampPageIndex(type, value, sheets = state.sheets) {
+      const pages = sheets[type]?.pages || [];
+      const last = Math.max(0, pages.length - 1);
+      const number = Number(value);
+      if (!Number.isFinite(number)) return 0;
+      return Math.min(Math.max(0, number), last);
+    }
+
+    function currentIndex(type) {
+      state.pageIndex[type] = clampPageIndex(type, state.pageIndex[type]);
+      return state.pageIndex[type];
+    }
+
+    function currentPage(type) {
+      const pages = getPages(type);
+      return pages[currentIndex(type)];
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function nl(value) {
+      return escapeHtml(value).replaceAll("\n", "<br>");
+    }
+
+    function inputField(path, label, type = "text", extra = "") {
+      return `
+        <div class="field ${extra}">
+          <label for="${path}">${label}</label>
+          <input id="${path}" type="${type}" value="${escapeHtml(getPath(path))}" data-path="${path}">
+        </div>
+      `;
+    }
+
+    function textareaField(path, label, extra = "") {
+      return `
+        <div class="field ${extra}">
+          <label for="${path}">${label}</label>
+          <textarea id="${path}" data-path="${path}">${escapeHtml(getPath(path))}</textarea>
+        </div>
+      `;
+    }
+
+    function selectField(path, label, options, extra = "") {
+      const current = getPath(path);
+      return `
+        <div class="field ${extra}">
+          <label for="${path}">${label}</label>
+          <select id="${path}" data-path="${path}">
+            ${options.map((option) => `<option value="${escapeHtml(option)}" ${option === current ? "selected" : ""}>${escapeHtml(option || "-")}</option>`).join("")}
+          </select>
+        </div>
+      `;
+    }
+
+    function recordingMethodField(path) {
+      const current = getPath(path) || "동시";
+      return `
+        <div class="field">
+          <span class="field-label">녹음방식</span>
+          <div class="segmented" data-segment="${path}">
+            <button type="button" data-value="동시" aria-pressed="${current === "동시"}">동시</button>
+            <button type="button" data-value="후시" aria-pressed="${current === "후시"}">후시</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function getPath(path) {
+      return path.split(".").reduce((acc, part) => acc?.[part], state) ?? "";
+    }
+
+    function setPath(path, value) {
+      const parts = path.split(".");
+      let target = state;
+      parts.slice(0, -1).forEach((part) => {
+        target = target[part];
+      });
+      target[parts.at(-1)] = value;
+      saveState();
+      renderTitle();
+      renderPreview();
+      refreshPageControls();
+    }
+
+    function renderBasicInputs() {
+      return `
+        <section class="form-section">
+          <h3 class="section-label">기본 세션</h3>
+          <div class="field-grid">
+            ${inputField("basic.projectName", "프로젝트명")}
+            ${inputField("basic.date", "촬영 날짜", "date")}
+            ${inputField("basic.startTime", "촬영 시작 시간", "time")}
+            ${inputField("basic.location", "촬영 로케이션")}
+            ${inputField("basic.weather", "날씨 기입란", "text", "full")}
+          </div>
+        </section>
+      `;
+    }
+
+    function pageLabel(type, page, index) {
+      const scene = String(page?.session1?.scene || "").trim();
+      const cut = String(page?.session1?.cut || "").trim();
+      const sceneCut = scene || cut ? ` · 씬 ${scene || "-"} / 컷 ${cut || "-"}` : "";
+      return `${index + 1}페이지${sceneCut}`;
+    }
+
+    function renderPageControls(type) {
+      const pages = getPages(type);
+      const index = currentIndex(type);
+      return `
+        <section class="form-section">
+          <h3 class="section-label">페이지</h3>
+          <div class="page-controls">
+            <div class="page-control-row">
+              <button class="small-button" type="button" data-page-prev ${index === 0 ? "disabled" : ""}>이전</button>
+              <select data-page-select aria-label="현재 페이지">
+                ${pages.map((page, pageIndex) => `<option value="${pageIndex}" ${pageIndex === index ? "selected" : ""}>${escapeHtml(pageLabel(type, page, pageIndex))}</option>`).join("")}
+              </select>
+              <button class="small-button" type="button" data-page-next ${index === pages.length - 1 ? "disabled" : ""}>다음</button>
+            </div>
+            <div class="page-control-row">
+              <button class="small-button" type="button" data-add-page>페이지 추가</button>
+              <button class="small-button" type="button" data-copy-page>현재 복제</button>
+              <button class="small-button danger" type="button" data-delete-page>페이지 삭제</button>
+              <span class="page-status" data-page-status>${index + 1} / ${pages.length} 페이지</span>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function refreshPageControls() {
+      if (state.activeTab === "output") return;
+      const type = state.activeTab;
+      const select = formMount.querySelector("[data-page-select]");
+      if (!select) return;
+      getPages(type).forEach((page, index) => {
+        if (select.options[index]) {
+          select.options[index].textContent = pageLabel(type, page, index);
+        }
+      });
+      const status = formMount.querySelector("[data-page-status]");
+      if (status) {
+        status.textContent = `${currentIndex(type) + 1} / ${getPages(type).length} 페이지`;
+      }
+    }
+
+    function renderSession1Inputs(type) {
+      const meta = SHEET_META[type];
+      const pageIndex = currentIndex(type);
+      const fields = meta.session1.map(([key, label]) => {
+        const path = `sheets.${type}.pages.${pageIndex}.session1.${key}`;
+        if (key === "recordingMethod") return recordingMethodField(path);
+        return inputField(path, label);
+      }).join("");
+
+      return `
+        <section class="form-section">
+          <h3 class="section-label">세션 1</h3>
+          <div class="field-grid">
+            ${fields}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderSession2Inputs(type) {
+      const pageIndex = currentIndex(type);
+      return `
+        <section class="form-section">
+          <h3 class="section-label">세션 2</h3>
+          <div class="field-grid">
+            ${textareaField(`sheets.${type}.pages.${pageIndex}.session2.continuity`, "Continuity")}
+            ${textareaField(`sheets.${type}.pages.${pageIndex}.session2.actionDialog`, "지문, 대사")}
+            ${textareaField(`sheets.${type}.pages.${pageIndex}.session2.sound`, "사운드", "full")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderTakeInputs(type) {
+      const pageIndex = currentIndex(type);
+      const rows = currentPage(type).takes;
+      const cards = rows.map((row, index) => {
+        const prefix = `sheets.${type}.pages.${pageIndex}.takes.${index}`;
+        const fields = SHEET_META[type].takes === "combo"
+          ? `
+            <div class="field-grid three">
+              ${inputField(`${prefix}.take`, "테이크")}
+              ${inputField(`${prefix}.cameraRNo`, "R#")}
+              ${inputField(`${prefix}.cameraFileNo`, "촬영파일넘버")}
+              ${selectField(`${prefix}.cameraStatus`, "OK,Keep,NG", STATUS_OPTIONS)}
+              ${inputField(`${prefix}.soundRNo`, "R#")}
+              ${inputField(`${prefix}.soundFileNo`, "음향파일넘버")}
+              ${selectField(`${prefix}.soundStatus`, "OK,Keep,NG", STATUS_OPTIONS)}
+              ${inputField(`${prefix}.slate`, "슬레이트")}
+              ${textareaField(`${prefix}.content`, "내용", "full")}
+            </div>
+          `
+          : `
+            <div class="field-grid three">
+              ${inputField(`${prefix}.take`, "테이크")}
+              ${selectField(`${prefix}.status`, "OK,Keep,NG", STATUS_OPTIONS)}
+              ${inputField(`${prefix}.fileNo`, "파일넘버")}
+              ${inputField(`${prefix}.rNo`, "R#")}
+              ${inputField(`${prefix}.slate`, "슬레이트")}
+              ${textareaField(`${prefix}.content`, "내용", "full")}
+            </div>
+          `;
+
+        return `
+          <article class="take-card">
+            <div class="take-card-header">
+              <div class="take-card-title">Take ${index + 1}</div>
+              <button class="small-button danger" type="button" data-remove-take="${index}">삭제</button>
+            </div>
+            ${fields}
+          </article>
+        `;
+      }).join("");
+
+      return `
+        <section class="form-section">
+          <h3 class="section-label">세션 3</h3>
+          <div class="take-editor">
+            ${cards}
+          </div>
+          <div class="action-row">
+            <button class="action-button secondary" type="button" data-add-take>테이크 추가</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderForm() {
+      const type = state.activeTab;
+      formMount.innerHTML = `
+        ${renderBasicInputs()}
+        ${renderPageControls(type)}
+        ${renderSession1Inputs(type)}
+        ${renderSession2Inputs(type)}
+        ${renderTakeInputs(type)}
+      `;
+    }
+
+    function paperCell(label, value) {
+      return `
+        <div class="paper-cell">
+          <span class="paper-label">${escapeHtml(label)}</span>
+          <div class="paper-value">${nl(value)}</div>
+        </div>
+      `;
+    }
+
+    function renderPaper(type, page = currentPage(type), pageIndex = currentIndex(type), totalPages = getPages(type).length) {
+      const meta = SHEET_META[type];
+      const project = state.basic.projectName?.trim() || "프로젝트명";
+      const title = `[${project}] 스크립트 용지 / Script PaPer`;
+      const session1Class = type === "camera" ? "camera-grid" : type === "sound" ? "sound-grid" : "combo-grid";
+
+      return `
+        <article class="paper sheet-${type}">
+          <header class="paper-header">
+            <h2 class="paper-title">${escapeHtml(title)}</h2>
+            <div class="paper-type">
+              ${escapeHtml(meta.title)}
+              <span class="paper-page-count">${pageIndex + 1} / ${totalPages} Page</span>
+            </div>
+          </header>
+
+          <section class="paper-section">
+            <div class="paper-section-title">
+              <span>기본 세션</span>
+              <span>Basic Session</span>
+            </div>
+            <div class="paper-grid basic-grid">
+              ${paperCell("프로젝트명", state.basic.projectName)}
+              ${paperCell("촬영 날짜", state.basic.date)}
+              ${paperCell("촬영 시작 시간", state.basic.startTime)}
+              ${paperCell("촬영 로케이션", state.basic.location)}
+              ${paperCell("날씨 기입란", state.basic.weather)}
+            </div>
+          </section>
+
+          <section class="paper-section">
+            <div class="paper-section-title">
+              <span>세션 1</span>
+              <span>Session 1</span>
+            </div>
+            <div class="paper-grid ${session1Class}">
+              ${meta.session1.map(([key, label]) => paperCell(label, page.session1[key])).join("")}
+            </div>
+          </section>
+
+          <section class="paper-section">
+            <div class="paper-section-title">
+              <span>세션 2</span>
+              <span>Session 2</span>
+            </div>
+            <div class="paper-grid session2-grid">
+              ${paperCell("Continuity", page.session2.continuity)}
+              ${paperCell("지문, 대사", page.session2.actionDialog)}
+              ${paperCell("사운드", page.session2.sound)}
+            </div>
+          </section>
+
+          <section class="paper-section">
+            <div class="paper-section-title">
+              <span>세션 3</span>
+              <span>Session 3</span>
+            </div>
+            ${SHEET_META[type].takes === "combo" ? renderComboTable(printableTakes(type, page.takes)) : renderSingleTable(printableTakes(type, page.takes))}
+          </section>
+        </article>
+      `;
+    }
+
+    function renderSingleTable(rows) {
+      return `
+        <table class="take-table">
+          <colgroup>
+            <col class="take">
+            <col class="status">
+            <col class="file">
+            <col class="roll">
+            <col class="content">
+            <col class="slate">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>테이크</th>
+              <th>OK,Keep,NG</th>
+              <th>파일넘버</th>
+              <th>R#</th>
+              <th>내용</th>
+              <th>슬레이트</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((row) => `
+              <tr>
+                <td>${nl(row.take)}</td>
+                <td>${nl(row.status)}</td>
+                <td>${nl(row.fileNo)}</td>
+                <td>${nl(row.rNo)}</td>
+                <td>${nl(row.content)}</td>
+                <td>${nl(row.slate)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderComboTable(rows) {
+      return `
+        <table class="take-table">
+          <colgroup>
+            <col class="combo-take">
+            <col class="combo-r">
+            <col class="combo-file">
+            <col class="combo-status">
+            <col class="combo-r">
+            <col class="combo-file">
+            <col class="combo-status">
+            <col class="combo-content">
+            <col class="combo-slate">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>테이크</th>
+              <th>R#</th>
+              <th>촬영파일넘버</th>
+              <th>OK,Keep,NG</th>
+              <th>R#</th>
+              <th>음향파일넘버</th>
+              <th>OK,Keep,NG</th>
+              <th>내용</th>
+              <th>슬레이트</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((row) => `
+              <tr>
+                <td>${nl(row.take)}</td>
+                <td>${nl(row.cameraRNo)}</td>
+                <td>${nl(row.cameraFileNo)}</td>
+                <td>${nl(row.cameraStatus)}</td>
+                <td>${nl(row.soundRNo)}</td>
+                <td>${nl(row.soundFileNo)}</td>
+                <td>${nl(row.soundStatus)}</td>
+                <td>${nl(row.content)}</td>
+                <td>${nl(row.slate)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderPaperSet(type) {
+      const pages = getPages(type);
+      return `
+        <div class="paper-stack">
+          ${pages.map((page, index) => renderPaper(type, page, index, pages.length)).join("")}
+        </div>
+      `;
+    }
+
+    function renderPreview() {
+      if (state.activeTab !== "output") {
+        previewMount.innerHTML = renderPaper(state.activeTab);
+      }
+      renderOutputTypeButtons();
+      outputMount.innerHTML = renderPaperSet(state.outputType);
+    }
+
+    function renderOutputTypeButtons() {
+      document.querySelectorAll("[data-output-type]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.outputType === state.outputType));
+      });
+    }
+
+    function renderTabs() {
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        button.setAttribute("aria-selected", String(button.dataset.tab === state.activeTab || (button.dataset.tab === "output" && state.activeTab === "output")));
+      });
+      const editorActive = state.activeTab !== "output";
+      editorPage.style.display = editorActive ? "grid" : "none";
+      outputPage.classList.toggle("active", !editorActive);
+    }
+
+    function renderTitle() {
+      const project = state.basic.projectName?.trim();
+      appTitle.textContent = project ? `[${project}] 스크립트 용지 / Script PaPer` : "스크립트 용지 / Script PaPer";
+    }
+
+    function render() {
+      renderTabs();
+      renderTitle();
+      if (state.activeTab !== "output") {
+        renderForm();
+      }
+      renderPreview();
+      bindFormEvents();
+    }
+
+    function bindFormEvents() {
+      formMount.querySelectorAll("[data-path]").forEach((field) => {
+        const eventName = field.tagName === "SELECT" ? "change" : "input";
+        field.addEventListener(eventName, (event) => {
+          setPath(event.target.dataset.path, event.target.value);
+        });
+      });
+
+      formMount.querySelectorAll("[data-page-select]").forEach((select) => {
+        select.addEventListener("change", (event) => {
+          const type = state.activeTab;
+          state.pageIndex[type] = Number(event.target.value);
+          saveState();
+          render();
+        });
+      });
+
+      formMount.querySelectorAll("[data-page-prev]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const type = state.activeTab;
+          state.pageIndex[type] = Math.max(0, currentIndex(type) - 1);
+          saveState();
+          render();
+        });
+      });
+
+      formMount.querySelectorAll("[data-page-next]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const type = state.activeTab;
+          state.pageIndex[type] = Math.min(getPages(type).length - 1, currentIndex(type) + 1);
+          saveState();
+          render();
+        });
+      });
+
+      formMount.querySelectorAll("[data-add-page]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const type = state.activeTab;
+          getPages(type).push(createPage(type));
+          state.pageIndex[type] = getPages(type).length - 1;
+          saveState();
+          render();
+        });
+      });
+
+      formMount.querySelectorAll("[data-copy-page]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const type = state.activeTab;
+          getPages(type).push(clonePage(currentPage(type)));
+          state.pageIndex[type] = getPages(type).length - 1;
+          saveState();
+          render();
+        });
+      });
+
+      formMount.querySelectorAll("[data-delete-page]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const type = state.activeTab;
+          const pages = getPages(type);
+          if (pages.length === 1) {
+            pages[0] = createPage(type);
+          } else {
+            pages.splice(currentIndex(type), 1);
+            state.pageIndex[type] = clampPageIndex(type, state.pageIndex[type]);
+          }
+          saveState();
+          render();
+        });
+      });
+
+      formMount.querySelectorAll("[data-segment]").forEach((group) => {
+        group.querySelectorAll("button").forEach((button) => {
+          button.addEventListener("click", () => {
+            setPath(group.dataset.segment, button.dataset.value);
+            renderForm();
+            bindFormEvents();
+          });
+        });
+      });
+
+      formMount.querySelectorAll("[data-add-take]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const type = state.activeTab;
+          currentPage(type).takes.push(blankTakeFor(type));
+          saveState();
+          render();
+        });
+      });
+
+      formMount.querySelectorAll("[data-remove-take]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const type = state.activeTab;
+          const takes = currentPage(type).takes;
+          if (takes.length === 1) {
+            takes[0] = blankTakeFor(type);
+          } else {
+            takes.splice(Number(button.dataset.removeTake), 1);
+          }
+          saveState();
+          render();
+        });
+      });
+    }
+
+    document.querySelectorAll(".tab-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.activeTab = button.dataset.tab;
+        if (button.dataset.tab !== "output") {
+          state.outputType = button.dataset.tab;
+        }
+        saveState();
+        render();
+      });
+    });
+
+    document.querySelectorAll("[data-output-type]").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.outputType = button.dataset.outputType;
+        saveState();
+        renderPreview();
+      });
+    });
+
+    document.getElementById("clearSheet").addEventListener("click", () => {
+      const type = state.activeTab;
+      getPages(type)[currentIndex(type)] = createPage(type);
+      saveState();
+      render();
+    });
+
+    document.getElementById("printCurrent").addEventListener("click", () => {
+      printSheet(state.activeTab, "current");
+    });
+
+    document.getElementById("printOutput").addEventListener("click", () => {
+      printSheet(state.outputType, "all");
+    });
+
+    function printSheet(type, scope) {
+      const printMount = document.getElementById("printMount");
+      printMount.innerHTML = scope === "current" ? renderPaper(type) : renderPaperSet(type);
+      document.body.classList.add("printing");
+      window.setTimeout(() => window.print(), 60);
+    }
+
+    window.addEventListener("afterprint", () => {
+      document.body.classList.remove("printing");
+      document.getElementById("printMount").innerHTML = "";
+    });
+
+    render();
+  </script>
+</body>
+</html>
