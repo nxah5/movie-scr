@@ -835,6 +835,8 @@
               <button class="small-button output-type-button" type="button" data-output-type="camera" aria-pressed="true">촬영 스크립트</button>
               <button class="small-button output-type-button" type="button" data-output-type="sound" aria-pressed="false">음향 스크립트</button>
               <button class="small-button output-type-button" type="button" data-output-type="combo" aria-pressed="false">촬영,음향 스크립트</button>
+              <button class="action-button secondary" type="button" id="importData">불러오기</button>
+              <button class="action-button secondary" type="button" id="exportData">파일 출력</button>
               <button class="action-button" type="button" id="printOutput">인쇄</button>
             </div>
           </div>
@@ -845,6 +847,7 @@
   </div>
 
   <div id="printMount" aria-hidden="true"></div>
+  <input id="importDataFile" type="file" accept="application/json,.json" hidden>
 
   <script>
     const STORAGE_KEY = "codex_script_paper_v1";
@@ -1063,6 +1066,49 @@
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function exportData() {
+      const projectName = state.basic.projectName?.trim() || "script-paper";
+      const safeName = projectName.replace(/[\\/:*?"<>|]+/g, "-").slice(0, 60) || "script-paper";
+      const date = new Date().toISOString().slice(0, 10);
+      const backup = {
+        format: "script-paper-backup",
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        data: state
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = safeName + "-" + date + ".script-paper.json";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+
+    function importData(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const backup = JSON.parse(reader.result);
+          const importedState = backup?.format === "script-paper-backup" ? backup.data : backup?.data || backup;
+          if (!importedState || typeof importedState !== "object" || !importedState.basic || !importedState.sheets) {
+            throw new Error("Invalid script paper backup");
+          }
+          if (!window.confirm("현재 작성 중인 내용은 불러온 파일의 내용으로 바뀝니다. 계속할까요?")) {
+            return;
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(importedState));
+          window.location.reload();
+        } catch (error) {
+          window.alert("스크립트 용지 파일을 읽을 수 없습니다. 파일 형식을 확인해주세요.");
+        }
+      };
+      reader.onerror = () => window.alert("파일을 읽는 중 문제가 발생했습니다.");
+      reader.readAsText(file, "utf-8");
     }
 
     function escapeHtml(value) {
@@ -1637,6 +1683,18 @@
 
     document.getElementById("printOutput").addEventListener("click", () => {
       printSheet(state.outputType, "all");
+    });
+
+    document.getElementById("exportData").addEventListener("click", exportData);
+
+    const importDataFile = document.getElementById("importDataFile");
+    document.getElementById("importData").addEventListener("click", () => {
+      importDataFile.click();
+    });
+    importDataFile.addEventListener("change", () => {
+      const [file] = importDataFile.files;
+      if (file) importData(file);
+      importDataFile.value = "";
     });
 
     function printSheet(type, scope) {
